@@ -52,6 +52,12 @@ ImuFilterRos::ImuFilterRos(ros::NodeHandle nh, ros::NodeHandle nh_private):
     publish_debug_topics_= false;
   if (!nh_private_.getParam ("use_magnetic_field_msg", use_magnetic_field_msg_))
     use_magnetic_field_msg_ = true;
+  if (!nh_private_.getParam ("imu_input_ns", imu_input_ns_))
+    imu_input_ns_ = "imu"; 
+  if (!nh_private_.getParam ("mag_input_ns", mag_input_ns_))
+    mag_input_ns_ = "imu"; 
+  if (!nh_private_.getParam ("imu_output_ns", imu_output_ns_))
+    imu_output_ns_ = "imu";
 
   std::string world_frame;
   // Default should become false for next release
@@ -95,7 +101,7 @@ ImuFilterRos::ImuFilterRos(ros::NodeHandle nh, ros::NodeHandle nh_private):
 
   // **** register publishers
   imu_publisher_ = nh_.advertise<sensor_msgs::Imu>(
-    ros::names::resolve("imu") + "/data", 5);
+    ros::names::resolve(imu_output_ns_) + "/data", 5);
 
   if (publish_debug_topics_)
   {
@@ -111,14 +117,14 @@ ImuFilterRos::ImuFilterRos(ros::NodeHandle nh, ros::NodeHandle nh_private):
   int queue_size = 5;
 
   imu_subscriber_.reset(new ImuSubscriber(
-    nh_, ros::names::resolve("imu") + "/data_raw", queue_size));
+    nh_, ros::names::resolve(imu_input_ns_) + "/data_raw", queue_size));
 
   if (use_mag_)
   {
     if (use_magnetic_field_msg_)
     {
       mag_subscriber_.reset(new MagSubscriber(
-        nh_, ros::names::resolve("imu") + "/mag", queue_size));
+        nh_, ros::names::resolve(mag_input_ns_) + "/mag", queue_size));
     }
     else
     {
