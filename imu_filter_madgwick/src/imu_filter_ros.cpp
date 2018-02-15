@@ -180,6 +180,10 @@ void ImuFilterRos::imuCallback(const ImuMsg::ConstPtr& imu_msg_raw)
   {
     geometry_msgs::Quaternion init_q;
     StatelessOrientation::computeOrientation(world_frame_, lin_acc, init_q);
+    init_q.x = 0;
+    init_q.y = 0;
+    init_q.z = 0;
+    init_q.w = 1;
     filter_.setOrientation(init_q.w, init_q.x, init_q.y, init_q.z);
 
     // initialize time
