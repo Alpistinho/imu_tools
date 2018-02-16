@@ -179,11 +179,22 @@ void ImuFilterRos::imuCallback(const ImuMsg::ConstPtr& imu_msg_raw)
   if (!initialized_ || stateless_)
   {
     geometry_msgs::Quaternion init_q;
+    tf2Scalar roll = 0.0;
+    tf2Scalar pitch = 0.0;
+    tf2Scalar yaw = 0.0;
+    tf2::Quaternion q;
+
     StatelessOrientation::computeOrientation(world_frame_, lin_acc, init_q);
-    init_q.x = 0;
-    init_q.y = 0;
-    init_q.z = 0;
-    init_q.w = 1;
+
+    tf2::Matrix3x3 mat = tf2::Matrix3x3(tf2::Quaternion(init_q.x, init_q.y, init_q.z, init_q.w));
+    mat.getRPY(roll, pitch, yaw, 0);
+    mat.setRPY(roll, pitch, 3.14159265359);
+    
+    mat.getRotation(q);
+    init_q.x = q.x();
+    init_q.y = q.y();
+    init_q.z = q.z();
+    init_q.w = q.w();
     filter_.setOrientation(init_q.w, init_q.x, init_q.y, init_q.z);
 
     // initialize time
