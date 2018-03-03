@@ -116,6 +116,8 @@ ImuFilterRos::ImuFilterRos(ros::NodeHandle nh, ros::NodeHandle nh_private):
   // Synchronize inputs. Topic subscriptions happen on demand in the connection callback.
   int queue_size = 5;
 
+  pose_subscriber_ = nh_.subscribe(ros::names::resolve("pose"), 10, &ImuFilterRos::poseCallback, this);
+
   imu_subscriber_.reset(new ImuSubscriber(
     nh_, ros::names::resolve(imu_input_ns_) + "/data_raw", queue_size));
 
@@ -187,8 +189,9 @@ void ImuFilterRos::imuCallback(const ImuMsg::ConstPtr& imu_msg_raw)
     StatelessOrientation::computeOrientation(world_frame_, lin_acc, init_q);
 
     tf2::Matrix3x3 mat = tf2::Matrix3x3(tf2::Quaternion(init_q.x, init_q.y, init_q.z, init_q.w));
-    mat.getRPY(roll, pitch, yaw, 0);
-    mat.setRPY(roll, pitch, 3.14159265359);
+    mat.getRPY(roll, pitch, yaw, 1);
+    //mat.setRPY(roll, pitch, 3.14159265359);
+    mat.setRPY(roll, pitch, 0);
     
     mat.getRotation(q);
     init_q.x = q.x();
@@ -220,6 +223,11 @@ void ImuFilterRos::imuCallback(const ImuMsg::ConstPtr& imu_msg_raw)
   publishFilteredMsg(imu_msg_raw);
   if (publish_tf_)
     publishTransform(imu_msg_raw);
+}
+
+void ImuFilterRos::poseCallback(const geometry_msgs::Pose& poseMsg) {
+  ROS_INFO ("Setting pose");
+  filter_.setOrientation(poseMsg.orientation.x, poseMsg.orientation.y, poseMsg.orientation.z, poseMsg.orientation.w);
 }
 
 void ImuFilterRos::imuMagCallback(

@@ -29,6 +29,7 @@
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/MagneticField.h>
 #include <geometry_msgs/Vector3Stamped.h>
+#include <geometry_msgs/Pose.h>
 #include "tf2_ros/transform_broadcaster.h"
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
@@ -68,6 +69,8 @@ class ImuFilterRos
     boost::shared_ptr<ImuSubscriber> imu_subscriber_;
     boost::shared_ptr<MagSubscriber> mag_subscriber_;
     boost::shared_ptr<Synchronizer> sync_;
+
+    ros::Subscriber pose_subscriber_;
 
     // Adapter to support the use_magnetic_field_msg param.
     boost::shared_ptr<MagVectorSubscriber> vector_mag_subscriber_;
@@ -122,6 +125,8 @@ class ImuFilterRos
 
     void reconfigCallback(FilterConfig& config, uint32_t level);
     void checkTopicsTimerCallback(const ros::TimerEvent&);
+
+    void poseCallback(const geometry_msgs::Pose&);
 };
 
 #endif // IMU_FILTER_IMU_MADWICK_FILTER_ROS_H
