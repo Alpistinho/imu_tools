@@ -1,0 +1,10 @@
+madgwickNode:
+        gain: 0.1
+        zeta: 0.1  
+        use_mag: false
+        imu_input_ns: "imuPub/imu/"
+        mag_input_ns: "~"
+        imu_output_ns: "~"
+        fixed_frame: "right_row"
+        world_frame: "enu"
+        publish_tf: true
